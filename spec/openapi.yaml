@@ -1,0 +1,544 @@
+openapi: "3.0.3"
+
+info:
+  title: RAVEN API
+  version: "2.0.0"
+  description: |
+    RAVEN (Reasoning Agent for Vulnerability ExaminatioN) is an AI-driven platform
+    for automated code vulnerability detection and remediation.
+
+    **Supported languages:** C, C++, Java
+
+    **Scan modes:** Basic (fast, all endpoints) and Pro (deep analysis, project-level only).
+  contact:
+    name: AI4Secure
+    email: contact@ai4secure.com
+
+servers:
+  - url: https://api.raven.ai4secure.com
+    description: Production
+
+security:
+  - ApiKeyAuth: []
+
+tags:
+  - name: Scan
+    description: Vulnerability detection endpoints
+  - name: Fix
+    description: Vulnerability fix generation
+  - name: Follow-up
+    description: Interactive Q&A on scan results
+  - name: System
+    description: System health and status
+
+paths:
+  /api/scan/snippet:
+    post:
+      tags: [Scan]
+      summary: Scan a code snippet
+      description: |
+        Scan a code snippet for vulnerabilities using Basic mode.
+        Processing time: 2-10 seconds.
+      operationId: scanSnippet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScanSnippetRequest"
+            example:
+              code: "#include <stdio.h>\nint main() {\n  char buf[10];\n  gets(buf);\n  return 0;\n}"
+              language: "c"
+      responses:
+        "200":
+          description: Scan completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanSnippetResponse"
+              example:
+                request_id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                elapsed_ms: 4523
+                status: "completed"
+                verdict: "vulnerable"
+                vulnerable_lines:
+                  - start: 4
+                    end: 4
+                importance: "high"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /api/scan/files:
+    post:
+      tags: [Scan]
+      summary: Scan uploaded source files
+      description: |
+        Upload and scan multiple source files using Basic mode.
+        Processing time: 5-30 seconds per file (concurrent).
+      operationId: scanFiles
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [files]
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Source files to scan
+                language:
+                  type: string
+                  enum: [c, cpp, cxx, java, auto]
+                  default: auto
+                  description: Programming language (default auto-detect)
+      responses:
+        "200":
+          description: Scan completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanFilesResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /api/scan/project:
+    post:
+      tags: [Scan]
+      summary: Scan a project archive
+      description: |
+        Upload and scan a project archive (.zip). RAVEN automatically selects key
+        source files for analysis. Supports Basic and Pro modes.
+
+        Processing time: Basic 3-10 minutes, Pro 1-5 hours.
+      operationId: scanProject
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [archive]
+              properties:
+                archive:
+                  type: string
+                  format: binary
+                  description: Project archive (.zip, max 25 MB)
+                mode:
+                  type: string
+                  enum: [basic, pro]
+                  default: basic
+                  description: Scan mode
+      responses:
+        "200":
+          description: Scan completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanProjectResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /api/fix:
+    post:
+      tags: [Fix]
+      summary: Generate vulnerability fix
+      description: |
+        Generate AI-driven fix suggestions for detected vulnerabilities.
+        Returns both human-readable explanation and structured output.
+        Processing time: 10-30 seconds per file.
+      operationId: generateFix
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FixRequest"
+            example:
+              code: "#include <stdio.h>\nint main() {\n  char buf[10];\n  gets(buf);\n  return 0;\n}"
+              language: "c"
+              findings: "Buffer overflow via gets() at line 4"
+              vuln_pairs:
+                - line: 4
+                  reason: "Use of unsafe gets() function"
+                  category: "CWE-120"
+      responses:
+        "200":
+          description: Fix generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FixResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /api/followup:
+    post:
+      tags: [Follow-up]
+      summary: Follow-up Q&A
+      description: |
+        Ask follow-up questions about scan results. Supports multi-turn
+        conversations (up to 6 rounds).
+        Processing time: 5-15 seconds per question.
+      operationId: followup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FollowupRequest"
+            example:
+              code: "#include <stdio.h>\nint main() {\n  char buf[10];\n  gets(buf);\n  return 0;\n}"
+              language: "c"
+              findings: "Buffer overflow via gets() at line 4"
+              question: "Is this vulnerability exploitable remotely?"
+              history: []
+      responses:
+        "200":
+          description: Answer generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FollowupResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /api/healthz:
+    get:
+      tags: [System]
+      summary: Health check
+      description: Check if the RAVEN API is running. No authentication required.
+      operationId: healthCheck
+      security: []
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthzResponse"
+              example:
+                ok: true
+                timestamp: "2026-03-24T12:00:00Z"
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key provided by AI4Secure
+
+  schemas:
+    ScanSnippetRequest:
+      type: object
+      required: [code, language]
+      properties:
+        code:
+          type: string
+          maxLength: 204800
+          description: Source code to scan (max 200 KB)
+        language:
+          type: string
+          enum: [c, cpp, cxx, java]
+          description: Programming language
+
+    VulnerableLineRange:
+      type: object
+      properties:
+        start:
+          type: integer
+          description: Start line number
+        end:
+          type: integer
+          description: End line number
+
+    ScanSnippetResponse:
+      type: object
+      properties:
+        request_id:
+          type: string
+          format: uuid
+          description: Unique scan request identifier
+        elapsed_ms:
+          type: integer
+          description: Processing time in milliseconds
+        status:
+          type: string
+          enum: [completed, failed]
+        verdict:
+          type: string
+          enum: [vulnerable, safe]
+          description: Overall vulnerability verdict
+        vulnerable_lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/VulnerableLineRange"
+          description: Line ranges where vulnerabilities were found
+        importance:
+          type: string
+          enum: [critical, high, medium, low]
+          description: Severity level
+
+    FileResult:
+      type: object
+      properties:
+        filename:
+          type: string
+          description: Name of the scanned file
+        verdict:
+          type: string
+          enum: [vulnerable, safe]
+        vulnerable_lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/VulnerableLineRange"
+        importance:
+          type: string
+          enum: [critical, high, medium, low]
+
+    ScanFilesResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [completed, failed]
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/FileResult"
+
+    ScanProjectResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [completed, failed]
+        project:
+          type: string
+          description: Name of the uploaded archive
+        mode:
+          type: string
+          enum: [basic, pro]
+          description: Scan mode used
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/FileResult"
+        selection_meta:
+          type: object
+          properties:
+            candidate_count:
+              type: integer
+              description: Total source files found in archive
+            selected_count:
+              type: integer
+              description: Files selected for scanning (max 30)
+
+    VulnPair:
+      type: object
+      properties:
+        line:
+          type: integer
+          description: Line number of the vulnerability
+        reason:
+          type: string
+          description: Description of the vulnerability
+        category:
+          type: string
+          description: CWE category (e.g., CWE-120)
+
+    FixRequest:
+      type: object
+      required: [code, language]
+      properties:
+        code:
+          type: string
+          description: Original source code
+        language:
+          type: string
+          enum: [c, cpp, cxx, java]
+        findings:
+          type: string
+          description: Scan findings (text or JSON)
+        vuln_pairs:
+          type: array
+          items:
+            $ref: "#/components/schemas/VulnPair"
+          description: Structured vulnerability locations
+
+    RepairPair:
+      type: object
+      properties:
+        line:
+          type: integer
+          description: Line number that was modified
+        reason:
+          type: string
+          description: Explanation of the fix
+
+    FixResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [success, failed]
+        fix_markdown:
+          type: string
+          description: Human-readable fix explanation (Markdown)
+        fixed_code:
+          type: string
+          description: Complete fixed source code
+        repair_pairs:
+          type: array
+          items:
+            $ref: "#/components/schemas/RepairPair"
+        model:
+          type: string
+          description: Internal model identifier
+
+    ConversationMessage:
+      type: object
+      required: [role, content]
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+
+    FollowupRequest:
+      type: object
+      required: [code, language, question]
+      properties:
+        code:
+          type: string
+          description: Source code being discussed
+        language:
+          type: string
+          enum: [c, cpp, cxx, java]
+        findings:
+          type: string
+          description: Scan findings for context
+        question:
+          type: string
+          description: Follow-up question
+        history:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConversationMessage"
+          maxItems: 12
+          description: Previous conversation turns (max 6 rounds = 12 messages)
+
+    FollowupResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [success, failed]
+        answer:
+          type: string
+          description: AI-generated answer
+        vulnerable_lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/VulnerableLineRange"
+
+    HealthzResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        timestamp:
+          type: string
+          format: date-time
+
+    ErrorDetail:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        details:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [error]
+        error:
+          $ref: "#/components/schemas/ErrorDetail"
+
+  responses:
+    BadRequest:
+      description: Bad Request - input format incorrect or invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    Unauthorized:
+      description: Unauthorized - missing or invalid API key
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    PayloadTooLarge:
+      description: Payload Too Large - exceeds size limit
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - required fields missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    TooManyRequests:
+      description: Too Many Requests - rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"

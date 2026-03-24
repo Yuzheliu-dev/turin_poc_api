@@ -1,0 +1,14 @@
+/* RAVEN API Docs - Custom styles */
+.wy-nav-content {
+    max-width: 900px;
+}
+
+.rst-content code.literal {
+    color: #e74c3c;
+    font-size: 90%;
+}
+
+.rst-content table.docutils td,
+.rst-content table.docutils th {
+    padding: 8px 12px;
+}
