@@ -30,7 +30,7 @@ Add a RAVEN security scan step to your GitHub Actions workflow:
              RAVEN_API_KEY: ${{ secrets.RAVEN_API_KEY }}
            run: |
              RESPONSE=$(curl -s -w "\n%{http_code}" \
-               -X POST https://api.raven.ai4secure.com/api/scan/project \
+               -X POST $RAVEN_BASE_URL/api/scan/project \
                -H "X-API-Key: $RAVEN_API_KEY" \
                -F "archive=@project.zip" \
                -F "mode=basic")
@@ -66,7 +66,7 @@ GitLab CI
        - zip -r project.zip src/ -x "*.git*"
        - |
          RESPONSE=$(curl -s \
-           -X POST https://api.raven.ai4secure.com/api/scan/project \
+           -X POST $RAVEN_BASE_URL/api/scan/project \
            -H "X-API-Key: $RAVEN_API_KEY" \
            -F "archive=@project.zip" \
            -F "mode=basic")

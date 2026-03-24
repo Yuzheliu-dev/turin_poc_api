@@ -35,3 +35,11 @@ source_suffix = {
 }
 
 http_strict_mode = False
+
+# -- Base URL placeholder (TBD) ------------------------------------------------
+# Change this value once the production URL is finalized.
+raven_base_url = "https://<BASE_URL_TBD>"
+
+rst_epilog = f"""
+.. |base_url| replace:: {raven_base_url}
+"""

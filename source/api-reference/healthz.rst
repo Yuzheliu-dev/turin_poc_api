@@ -15,7 +15,7 @@ No request body or parameters required.
 
 .. code-block:: bash
 
-   curl https://api.raven.ai4secure.com/api/healthz
+   curl $RAVEN_BASE_URL/api/healthz
 
 Response
 --------

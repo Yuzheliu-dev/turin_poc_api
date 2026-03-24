@@ -6,10 +6,17 @@ All examples use the built-in ``fetch`` API (Node.js 18+ or any modern browser).
 Setup
 -----
 
+Set the following environment variables before running:
+
+.. code-block:: bash
+
+   export RAVEN_API_KEY="your-api-key"
+   export RAVEN_BASE_URL="https://<BASE_URL_TBD>"   # update when finalized
+
 .. code-block:: javascript
 
    const API_KEY = process.env.RAVEN_API_KEY;
-   const BASE_URL = "https://api.raven.ai4secure.com";
+   const BASE_URL = process.env.RAVEN_BASE_URL;
 
    const headers = {
      "Content-Type": "application/json",

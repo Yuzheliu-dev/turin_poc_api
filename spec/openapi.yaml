@@ -15,8 +15,8 @@ info:
     email: contact@ai4secure.com
 
 servers:
-  - url: https://api.raven.ai4secure.com
-    description: Production
+  - url: https://TBD.example.com
+    description: Production (URL TBD — update when finalized)
 
 security:
   - ApiKeyAuth: []

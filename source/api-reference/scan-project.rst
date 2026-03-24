@@ -34,7 +34,7 @@ Send a ``multipart/form-data`` request with the following fields:
 
 .. code-block:: bash
 
-   curl -X POST https://api.raven.ai4secure.com/api/scan/project \
+   curl -X POST $RAVEN_BASE_URL/api/scan/project \
      -H "X-API-Key: $RAVEN_API_KEY" \
      -F "archive=@my-project.zip" \
      -F "mode=basic"

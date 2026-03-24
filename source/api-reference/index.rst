@@ -8,7 +8,13 @@ All API requests should be sent to:
 
 .. code-block:: text
 
-   https://api.raven.ai4secure.com
+   <BASE_URL_TBD>
+
+.. note::
+
+   The production base URL has not been finalized. All examples in this
+   documentation use the environment variable ``$RAVEN_BASE_URL`` as a
+   placeholder. Set it to the actual URL before use.
 
 Content Types
 -------------

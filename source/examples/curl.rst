@@ -1,14 +1,19 @@
 cURL Examples
 =============
 
-All examples assume ``RAVEN_API_KEY`` is set as an environment variable.
+All examples assume the following environment variables are set:
+
+.. code-block:: bash
+
+   export RAVEN_API_KEY="your-api-key"
+   export RAVEN_BASE_URL="https://<BASE_URL_TBD>"   # update when finalized
 
 Scan a Code Snippet
 -------------------
 
 .. code-block:: bash
 
-   curl -X POST https://api.raven.ai4secure.com/api/scan/snippet \
+   curl -X POST $RAVEN_BASE_URL/api/scan/snippet \
      -H "Content-Type: application/json" \
      -H "X-API-Key: $RAVEN_API_KEY" \
      -d '{
@@ -21,7 +26,7 @@ Scan Uploaded Files
 
 .. code-block:: bash
 
-   curl -X POST https://api.raven.ai4secure.com/api/scan/files \
+   curl -X POST $RAVEN_BASE_URL/api/scan/files \
      -H "X-API-Key: $RAVEN_API_KEY" \
      -F "files=@buffer.c" \
      -F "files=@utils.c" \
@@ -34,7 +39,7 @@ Scan a Project Archive
 
 .. code-block:: bash
 
-   curl -X POST https://api.raven.ai4secure.com/api/scan/project \
+   curl -X POST $RAVEN_BASE_URL/api/scan/project \
      -H "X-API-Key: $RAVEN_API_KEY" \
      -F "archive=@my-project.zip" \
      -F "mode=basic"
@@ -43,7 +48,7 @@ Scan a Project Archive
 
 .. code-block:: bash
 
-   curl -X POST https://api.raven.ai4secure.com/api/scan/project \
+   curl -X POST $RAVEN_BASE_URL/api/scan/project \
      -H "X-API-Key: $RAVEN_API_KEY" \
      -F "archive=@my-project.zip" \
      -F "mode=pro"
@@ -53,7 +58,7 @@ Generate a Fix
 
 .. code-block:: bash
 
-   curl -X POST https://api.raven.ai4secure.com/api/fix \
+   curl -X POST $RAVEN_BASE_URL/api/fix \
      -H "Content-Type: application/json" \
      -H "X-API-Key: $RAVEN_API_KEY" \
      -d '{
@@ -70,7 +75,7 @@ Follow-up Question
 
 .. code-block:: bash
 
-   curl -X POST https://api.raven.ai4secure.com/api/followup \
+   curl -X POST $RAVEN_BASE_URL/api/followup \
      -H "Content-Type: application/json" \
      -H "X-API-Key: $RAVEN_API_KEY" \
      -d '{
@@ -86,4 +91,4 @@ Health Check
 
 .. code-block:: bash
 
-   curl https://api.raven.ai4secure.com/api/healthz
+   curl $RAVEN_BASE_URL/api/healthz

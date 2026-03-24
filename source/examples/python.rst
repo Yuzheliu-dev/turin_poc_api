@@ -10,13 +10,20 @@ All examples use the ``requests`` library. Install it with:
 Setup
 -----
 
+Set the following environment variables before running:
+
+.. code-block:: bash
+
+   export RAVEN_API_KEY="your-api-key"
+   export RAVEN_BASE_URL="https://<BASE_URL_TBD>"   # update when finalized
+
 .. code-block:: python
 
    import os
    import requests
 
    API_KEY = os.environ["RAVEN_API_KEY"]
-   BASE_URL = "https://api.raven.ai4secure.com"
+   BASE_URL = os.environ["RAVEN_BASE_URL"]
    HEADERS = {
        "X-API-Key": API_KEY,
        "Content-Type": "application/json",

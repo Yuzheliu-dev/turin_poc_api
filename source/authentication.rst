@@ -23,7 +23,7 @@ Example
 
 .. code-block:: bash
 
-   curl -X POST https://api.raven.ai4secure.com/api/scan/snippet \
+   curl -X POST $RAVEN_BASE_URL/api/scan/snippet \
      -H "Content-Type: application/json" \
      -H "X-API-Key: YOUR_API_KEY" \
      -d '{"code": "int main() { char buf[10]; gets(buf); }", "language": "c"}'
