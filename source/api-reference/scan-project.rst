@@ -4,9 +4,9 @@ Scan Project
 .. http:post:: /api/scan/project
 
    Upload and scan a project archive (.zip). RAVEN automatically selects key source files
-   for analysis. Supports both **Basic** and **Pro** modes.
+   for analysis. Supports both **SAST** and **DAST** modes.
 
-   **Processing time:** Basic: 3--10 minutes. Pro: 1--5 hours (large projects).
+   **Processing time:** SAST: 3--10 minutes. DAST: 1--5 hours (large projects).
 
 Request
 -------
@@ -28,7 +28,7 @@ Send a ``multipart/form-data`` request with the following fields:
    * - ``mode``
      - string
      - No
-     - ``"basic"`` or ``"pro"`` (default: ``"basic"``)
+     - ``"sast"`` or ``"dast"`` (default: ``"sast"``)
 
 **Example (cURL):**
 
@@ -37,7 +37,7 @@ Send a ``multipart/form-data`` request with the following fields:
    curl -X POST $RAVEN_BASE_URL/api/scan/project \
      -H "X-API-Key: $RAVEN_API_KEY" \
      -F "archive=@my-project.zip" \
-     -F "mode=basic"
+     -F "mode=sast"
 
 Response
 --------
@@ -57,7 +57,7 @@ Response
      - Name of the uploaded archive
    * - ``mode``
      - string
-     - The scan mode used (``"basic"`` or ``"pro"``)
+     - The scan mode used (``"sast"`` or ``"dast"``)
    * - ``results``
      - array
      - Array of per-file scan results (same structure as :doc:`scan-files`)
@@ -88,7 +88,7 @@ Response
    {
      "status": "completed",
      "project": "my-project.zip",
-     "mode": "basic",
+     "mode": "sast",
      "results": [
        {
          "filename": "src/parser.c",
@@ -105,5 +105,5 @@ Response
 
 .. note::
 
-   **Pro mode** performs deeper semantic analysis and may take 1--5 hours for large
-   projects. For Pro scans, consider implementing asynchronous polling on the client side.
+   **DAST mode** performs deeper semantic analysis and may take 1--5 hours for large
+   projects. For DAST scans, consider implementing asynchronous polling on the client side.

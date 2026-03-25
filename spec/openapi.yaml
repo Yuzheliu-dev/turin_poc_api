@@ -7,9 +7,10 @@ info:
     RAVEN (Reasoning Agent for Vulnerability ExaminatioN) is an AI-driven platform
     for automated code vulnerability detection and remediation.
 
-    **Supported languages:** C, C++, Java
+    **SAST supported languages:** C, C++, Java, Python, Go, JavaScript, TypeScript, Rust, Ruby, PHP, Kotlin, Swift
+    **DAST supported languages:** C, C++
 
-    **Scan modes:** Basic (fast, all endpoints) and Pro (deep analysis, project-level only).
+    **Scan modes:** SAST (rule-based + LLM triage, all endpoints) and DAST (deep LLM analysis, project-level only).
   contact:
     name: AI4Secure
     email: contact@ai4secure.com
@@ -37,7 +38,7 @@ paths:
       tags: [Scan]
       summary: Scan a code snippet
       description: |
-        Scan a code snippet for vulnerabilities using Basic mode.
+        Scan a code snippet for vulnerabilities using SAST mode.
         Processing time: 2-10 seconds.
       operationId: scanSnippet
       requestBody:
@@ -81,7 +82,7 @@ paths:
       tags: [Scan]
       summary: Scan uploaded source files
       description: |
-        Upload and scan multiple source files using Basic mode.
+        Upload and scan multiple source files using SAST mode.
         Processing time: 5-30 seconds per file (concurrent).
       operationId: scanFiles
       requestBody:
@@ -100,7 +101,7 @@ paths:
                   description: Source files to scan
                 language:
                   type: string
-                  enum: [c, cpp, cxx, java, auto]
+                  enum: [c, cpp, cxx, java, python, go, javascript, typescript, auto]
                   default: auto
                   description: Programming language (default auto-detect)
       responses:
@@ -125,9 +126,9 @@ paths:
       summary: Scan a project archive
       description: |
         Upload and scan a project archive (.zip). RAVEN automatically selects key
-        source files for analysis. Supports Basic and Pro modes.
+        source files for analysis. Supports SAST and DAST modes.
 
-        Processing time: Basic 3-10 minutes, Pro 1-5 hours.
+        Processing time: SAST 3-10 minutes, DAST 1-5 hours.
       operationId: scanProject
       requestBody:
         required: true
@@ -143,8 +144,8 @@ paths:
                   description: Project archive (.zip, max 25 MB)
                 mode:
                   type: string
-                  enum: [basic, pro]
-                  default: basic
+                  enum: [sast, dast]
+                  default: sast
                   description: Scan mode
       responses:
         "200":
@@ -159,6 +160,41 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "413":
           $ref: "#/components/responses/PayloadTooLarge"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /api/scan/rules:
+    post:
+      tags: [Scan]
+      summary: Rule-based scan only
+      description: |
+        Run a rule-based static analysis scan without LLM reasoning.
+        Returns raw findings from the rule engine.
+        Processing time: 2-30 seconds.
+      operationId: scanRules
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScanRulesRequest"
+            example:
+              code: "#include <stdio.h>\nint main() {\n  char buf[10];\n  gets(buf);\n  return 0;\n}"
+              language: "c"
+              rules: "auto"
+      responses:
+        "200":
+          description: Scan completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanRulesResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
         "429":
           $ref: "#/components/responses/TooManyRequests"
 
@@ -275,7 +311,7 @@ components:
           description: Source code to scan (max 200 KB)
         language:
           type: string
-          enum: [c, cpp, cxx, java]
+          enum: [c, cpp, cxx, java, python, go, javascript, typescript, auto]
           description: Programming language
 
     VulnerableLineRange:
@@ -354,7 +390,7 @@ components:
           description: Name of the uploaded archive
         mode:
           type: string
-          enum: [basic, pro]
+          enum: [sast, dast]
           description: Scan mode used
         results:
           type: array
@@ -369,6 +405,51 @@ components:
             selected_count:
               type: integer
               description: Files selected for scanning (max 30)
+
+    ScanRulesRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Source code to scan (for snippet mode)
+        language:
+          type: string
+          description: Language hint (default auto-detect)
+        rules:
+          type: string
+          default: auto
+          description: "Rule set: auto, security, owasp-top-10, etc."
+
+    RuleFinding:
+      type: object
+      properties:
+        rule_id:
+          type: string
+          description: Rule identifier (e.g., CWE-120, security.buffer-overflow)
+        message:
+          type: string
+          description: Description of the finding
+        severity:
+          type: string
+          enum: [ERROR, WARNING, INFO]
+        file:
+          type: string
+          description: File path or <snippet>
+        line_start:
+          type: integer
+        line_end:
+          type: integer
+
+    ScanRulesResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [completed, failed]
+        findings:
+          type: array
+          items:
+            $ref: "#/components/schemas/RuleFinding"
 
     VulnPair:
       type: object
@@ -392,7 +473,7 @@ components:
           description: Original source code
         language:
           type: string
-          enum: [c, cpp, cxx, java]
+          enum: [c, cpp, cxx, java, python, go, javascript, typescript]
         findings:
           type: string
           description: Scan findings (text or JSON)
@@ -451,7 +532,7 @@ components:
           description: Source code being discussed
         language:
           type: string
-          enum: [c, cpp, cxx, java]
+          enum: [c, cpp, cxx, java, python, go, javascript, typescript]
         findings:
           type: string
           description: Scan findings for context

@@ -3,11 +3,8 @@ Authentication
 
 All RAVEN API endpoints (except ``/api/healthz``) require authentication via an API key.
 
-Obtaining an API Key
---------------------
-
-Contact the AI4Secure team to receive your API key. Each key is associated with a specific
-organization and rate limit tier.
+An API key will be provided to you by the AI4Secure team as part of the PoC setup.
+No action is needed on your side to obtain one.
 
 Using Your API Key
 ------------------

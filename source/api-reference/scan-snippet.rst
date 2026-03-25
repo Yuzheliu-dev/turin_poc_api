@@ -3,7 +3,7 @@ Scan Snippet
 
 .. http:post:: /api/scan/snippet
 
-   Scan a code snippet for vulnerabilities using **Basic** mode.
+   Scan a code snippet for vulnerabilities using **SAST** mode.
 
    **Processing time:** 2--10 seconds.
 
@@ -27,7 +27,7 @@ Send a JSON body with the source code and language.
    * - ``language``
      - string
      - Yes
-     - ``"c"``, ``"cpp"``, ``"cxx"``, or ``"java"``
+     - ``"c"``, ``"cpp"``, ``"cxx"``, ``"java"``, ``"python"``, ``"go"``, ``"javascript"``, ``"typescript"``, or ``"auto"``
 
 **Example request body:**
 

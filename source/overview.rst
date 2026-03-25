@@ -6,23 +6,60 @@ automated code vulnerability detection and remediation. It analyzes source code 
 security vulnerabilities, generates actionable fix suggestions, and supports interactive Q&A
 on scan results.
 
+Architecture
+------------
+
+.. image:: _static/raven_architecture_en.png
+   :alt: RAVEN Platform High-Level Architecture
+   :align: center
+   :width: 100%
+
 Supported Languages
 -------------------
 
 .. list-table::
    :header-rows: 1
-   :widths: 30 70
+   :widths: 30 20 50
 
    * - Language
-     - Status
-   * - C
+     - SAST
+     - DAST
+   * - C / C++
      - Supported
-   * - C++
      - Supported
    * - Java
      - Supported
-   * - Python, Go, TypeScript
      - On roadmap
+   * - Python
+     - Supported
+     - On roadmap
+   * - Go
+     - Supported
+     - On roadmap
+   * - JavaScript / TypeScript
+     - Supported
+     - On roadmap
+   * - Rust
+     - Supported
+     - On roadmap
+   * - Ruby
+     - Supported
+     - On roadmap
+   * - PHP
+     - Supported
+     - On roadmap
+   * - Kotlin
+     - Supported
+     - On roadmap
+   * - Swift
+     - Supported
+     - On roadmap
+
+.. note::
+
+   SAST mode leverages built-in rule-based static analysis engines that support a wide
+   range of languages out of the box. DAST mode uses LLM-powered deep semantic analysis
+   and currently supports C/C++ only, with more languages on the roadmap.
 
 Scan Modes
 ----------
@@ -37,17 +74,18 @@ RAVEN offers two scan modes:
      - Description
      - Speed
      - Availability
-   * - **Basic** (``"basic"``)
-     - LLM-powered fast vulnerability detection, suitable for code snippets, files, and general project scans
+   * - **SAST** (``"sast"``)
+     - Rule-based static analysis combined with LLM reasoning for triage and explanation
      - Seconds to minutes
      - All scan endpoints
-   * - **Pro** (``"pro"``)
+   * - **DAST** (``"dast"``)
      - LLM-powered deep semantic analysis with larger context and stronger reasoning capabilities
      - Minutes to hours
      - Project-level scans only
 
-Both modes use large language models (LLMs) for analysis. The key differences are analysis
-depth, context scope, and processing time.
+SAST mode uses established rule-based engines for fast pattern matching, with LLM-assisted
+triage to reduce false positives. DAST mode performs deeper cross-file semantic analysis
+powered entirely by large language models.
 
 Endpoint Summary
 ----------------
@@ -63,19 +101,24 @@ Endpoint Summary
      - Typical Response Time
    * - ``/api/scan/snippet``
      - POST
-     - Scan a code snippet (Basic)
+     - Scan a code snippet (SAST)
      - Yes (LLM)
      - 2--10 seconds
    * - ``/api/scan/files``
      - POST
-     - Scan uploaded source files (Basic)
+     - Scan uploaded source files (SAST)
      - Yes (LLM)
      - 5--30 seconds per file
    * - ``/api/scan/project``
      - POST
      - Scan a project archive (.zip)
      - Yes (LLM)
-     - Basic: 3--10 min; Pro: 1--5 hours
+     - SAST: 3--10 min; DAST: 1--5 hours
+   * - ``/api/scan/rules``
+     - POST
+     - Rule-based scan only (no LLM)
+     - No
+     - 2--30 seconds
    * - ``/api/fix``
      - POST
      - Generate vulnerability fix suggestions

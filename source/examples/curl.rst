@@ -35,23 +35,37 @@ Scan Uploaded Files
 Scan a Project Archive
 ----------------------
 
-**Basic mode:**
+**SAST mode:**
 
 .. code-block:: bash
 
    curl -X POST $RAVEN_BASE_URL/api/scan/project \
      -H "X-API-Key: $RAVEN_API_KEY" \
      -F "archive=@my-project.zip" \
-     -F "mode=basic"
+     -F "mode=sast"
 
-**Pro mode:**
+**DAST mode:**
 
 .. code-block:: bash
 
    curl -X POST $RAVEN_BASE_URL/api/scan/project \
      -H "X-API-Key: $RAVEN_API_KEY" \
      -F "archive=@my-project.zip" \
-     -F "mode=pro"
+     -F "mode=dast"
+
+Rule-Based Scan Only
+--------------------
+
+.. code-block:: bash
+
+   curl -X POST $RAVEN_BASE_URL/api/scan/rules \
+     -H "Content-Type: application/json" \
+     -H "X-API-Key: $RAVEN_API_KEY" \
+     -d '{
+       "code": "#include <stdio.h>\nint main() {\n  char buf[10];\n  gets(buf);\n  return 0;\n}",
+       "language": "c",
+       "rules": "auto"
+     }'
 
 Generate a Fix
 --------------

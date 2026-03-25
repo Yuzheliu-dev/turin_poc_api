@@ -68,7 +68,7 @@ Scan a Project Archive
      new Blob([await fs.promises.readFile("my-project.zip")]),
      "my-project.zip"
    );
-   formData.append("mode", "basic");
+   formData.append("mode", "sast");
 
    const response = await fetch(`${BASE_URL}/api/scan/project`, {
      method: "POST",

@@ -70,7 +70,7 @@ Scan a Project Archive
            f"{BASE_URL}/api/scan/project",
            headers={"X-API-Key": API_KEY},
            files={"archive": archive},
-           data={"mode": "basic"},
+           data={"mode": "sast"},
        )
    data = response.json()
    print(f"Scanned {data['selection_meta']['selected_count']} files")

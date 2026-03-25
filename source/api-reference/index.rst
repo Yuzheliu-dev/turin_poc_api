@@ -19,9 +19,9 @@ All API requests should be sent to:
 Content Types
 -------------
 
-- **JSON endpoints** (``/api/scan/snippet``, ``/api/fix``, ``/api/followup``):
+- **JSON endpoints** (``/api/scan/snippet``, ``/api/scan/rules``, ``/api/fix``, ``/api/followup``):
   Use ``Content-Type: application/json``.
-- **File upload endpoints** (``/api/scan/files``, ``/api/scan/project``):
+- **File upload endpoints** (``/api/scan/files``, ``/api/scan/project``, ``/api/scan/rules`` with files):
   Use ``Content-Type: multipart/form-data``.
 
 Authentication
@@ -39,6 +39,7 @@ Endpoints
    scan-snippet
    scan-files
    scan-project
+   scan-rules
    fix
    followup
    healthz

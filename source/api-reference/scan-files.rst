@@ -3,7 +3,7 @@ Scan Files
 
 .. http:post:: /api/scan/files
 
-   Upload and scan multiple source files using **Basic** mode.
+   Upload and scan multiple source files using **SAST** mode.
 
    **Processing time:** 5--30 seconds per file (files are scanned concurrently).
 
@@ -27,7 +27,7 @@ Send a ``multipart/form-data`` request with the following fields:
    * - ``language``
      - string
      - No
-     - ``"c"``, ``"cpp"``, ``"cxx"``, ``"java"``, or ``"auto"`` (default: ``"auto"``)
+     - ``"c"``, ``"cpp"``, ``"cxx"``, ``"java"``, ``"python"``, ``"go"``, ``"javascript"``, ``"typescript"``, or ``"auto"`` (default: ``"auto"``)
 
 **Example (cURL):**
 
